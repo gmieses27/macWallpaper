@@ -20,5 +20,5 @@ def is_dark_mode_active():
 
 def update_wallpaper(image_path):
     image_path = str(image_path)
-    script = f'tell application "System Events" to set picture of every desktop to "{image_path}"'
+    script = f'tell application "System Events" to set picture of desktop 1 to "{image_path}"'
     subprocess.run(["osascript", "-e", script], check=True)

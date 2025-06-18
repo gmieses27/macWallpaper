@@ -1,4 +1,5 @@
 from PIL import Image
+from datetime import datetime
 from pathlib import Path
 
 def generate_julia_set(width, height, dark_mode):
@@ -28,7 +29,7 @@ def generate_julia_set(width, height, dark_mode):
             pixels[i, j] = color
 
 
-    out_path = Path("/tmp/julia_set.png")
+    out_path = Path(f"/tmp/julia_set_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.png")
     img.save(out_path)
     return out_path
 
@@ -53,6 +54,6 @@ def generate_mandelbrot(width, height, max_iter=100):
             color = 255 - int(n * 255 / max_iter)
             pixels[x, y] = (123, color, color)
 
-    out_path = Path("/tmp/mandelbrot.png")
+    out_path = Path(f"/tmp/mandelbrot_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.png")
     img.save(out_path)
     return out_path
