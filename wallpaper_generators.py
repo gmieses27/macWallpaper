@@ -5,7 +5,7 @@ from pathlib import Path
 def generate_julia_set(width, height, dark_mode):
     import numpy as np
 
-    zoom = 1.5
+    zoom = .4
     x = np.linspace(-zoom, zoom, width)
     y = np.linspace(-zoom, zoom, height)
     X, Y = np.meshgrid(x, y)
@@ -39,8 +39,16 @@ def generate_mandelbrot(width, height, max_iter=100):
     pixels = img.load()
 
     # Coordinate space
-    xmin, xmax = -2.5, 1.5
+    # Zoomed-out (default view)
+    xmin, xmax = -2.0, 1.0
     ymin, ymax = -1.5, 1.5
+
+    # Zoomed-in (smaller range, centered at -0.75, 0)
+    zoom = 0.5  # smaller = more zoomed in
+    center_x, center_y = -0.75, 0.0
+    xmin, xmax = center_x - zoom, center_x + zoom
+    ymin, ymax = center_y - zoom, center_y + zoom
+
     for x in range(width):
         for y in range(height):
             zx = xmin + (xmax - xmin) * x / width

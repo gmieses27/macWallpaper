@@ -1,7 +1,5 @@
 import logging
-import subprocess
 import random
-from pathlib import Path
 
 from implementations import get_screen_resolution, is_dark_mode_active, update_wallpaper
 from wallpaper_generators import generate_julia_set, generate_mandelbrot
@@ -13,7 +11,7 @@ def main():
         width, height = get_screen_resolution()
         dark_mode = is_dark_mode_active()
         
-        choice = random.choice(["julia", "mandelbrot"])
+        choice = random.choice(["mandelbrot"])
 
         if choice == "julia":
             saved_image_path = generate_julia_set(width, height, dark_mode)
