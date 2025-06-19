@@ -1,11 +1,11 @@
-from PIL import Image
+import math
+from PIL import Image, ImageDraw
 from datetime import datetime
 from pathlib import Path
 import random
 import numpy as np
 
 def random_palette():
-    # Generate a list of random RGB tuples
     return [(
         random.randint(0, 255),
         random.randint(0, 255),
@@ -42,7 +42,7 @@ def generate_julia_set(width, height, dark_mode):
     img.save(out_path)
     return out_path
 
-def generate_mandelbrot(width, height, max_iter=1000, zoom=0.5, center_x=-0.75, center_y=0.0, dark_mode=False):
+def generate_mandelbrot_set(width, height, max_iter=1000, zoom=0.5, center_x=-0.75, center_y=0.0, dark_mode=False):
     x = np.linspace(center_x - zoom, center_x + zoom, width)
     y = np.linspace(center_y - zoom, center_y + zoom, height)
     X, Y = np.meshgrid(x, y)
@@ -68,6 +68,32 @@ def generate_mandelbrot(width, height, max_iter=1000, zoom=0.5, center_x=-0.75, 
                 color = (0, 0, 0) if dark_mode else (255, 255, 255)
             pixels[i, j] = color
 
-    out_path = Path(f"/tmp/mandelbrot_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.png")
+    out_path = Path(f"/tmp/mandelbrot_set_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.png")
     img.save(out_path)
     return out_path
+
+def generate_tree_fractal(width, height, dark_mode):
+    img = Image.new("RGB", (width, height), (0, 0, 0) if dark_mode else (255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    color = tuple(random.randint(64, 200) for _ in range(3))
+
+    start_x = width // 2
+    start_y = height - 50
+    trunk_length = height // 4 + random.randint(-20, 20)
+    draw_tree(draw, start_x, start_y, -math.pi / 2, 11, trunk_length, color)
+    out_path = Path(f"/tmp/tree_fractal_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.png")
+    img.save(out_path)
+    return out_path
+
+def draw_tree(draw, x1, y1, angle, depth, length, color):
+    if depth == 0:
+        return
+    x2 = x1 + int(math.cos(angle) * length)
+    y2 = y1 + int(math.sin(angle) * length)
+    draw.line((x1, y1, x2, y2), fill=color, width=max(1, depth // 2))
+
+    angle_variation = random.uniform(0.15, 0.35)
+    length_factor = random.uniform(0.7, 0.8)
+    draw_tree(draw, x2, y2, angle - angle_variation, depth - 1, length * length_factor, color)
+    draw_tree(draw, x2, y2, angle + angle_variation, depth - 1, length * length_factor, color)
