@@ -1,6 +1,6 @@
 import logging
-import random
-import time
+import secrets
+# import time
 
 from implementations import get_screen_resolution, is_dark_mode_active, update_wallpaper
 from wallpaper_generators import generate_julia_set, generate_mandelbrot_set, generate_tree_fractal
@@ -12,8 +12,8 @@ def main():
         width, height = get_screen_resolution()
         dark_mode = is_dark_mode_active()
         
-        choice = random.choice(["julia", "mandelbrot", "tree"])
-
+        choice = secrets.choice(["julia", "mandelbrot", "tree"])
+        logging.info(f"Selected fractal type: {choice}")
         if choice == "julia":
             saved_image_path = generate_julia_set(width, height, dark_mode)
         elif choice == "mandelbrot":
@@ -22,7 +22,7 @@ def main():
             saved_image_path = generate_tree_fractal(width, height, dark_mode)
 
         logging.info(f"Image saved to: {saved_image_path}")
-        time.sleep(1)  # Ensure the image is fully written before updating wallpaper
+        # time.sleep(1)
         update_wallpaper(saved_image_path)
 
     except Exception as e:
