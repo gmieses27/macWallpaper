@@ -1,10 +1,18 @@
 from PIL import Image
 from datetime import datetime
 from pathlib import Path
+import random
+import numpy as np
+
+def random_palette():
+    # Generate a list of random RGB tuples
+    return [(
+        random.randint(0, 255),
+        random.randint(0, 255),
+        random.randint(0, 255)
+    ) for _ in range(256)]
 
 def generate_julia_set(width, height, dark_mode):
-    import numpy as np
-
     zoom = .4
     x = np.linspace(-zoom, zoom, width)
     y = np.linspace(-zoom, zoom, height)
@@ -13,6 +21,7 @@ def generate_julia_set(width, height, dark_mode):
     C = complex(-0.7, 0.27015)
     iterations = 300
 
+    palette = random_palette()
     img = Image.new("RGB", (width, height))
     pixels = img.load()
 
@@ -23,44 +32,41 @@ def generate_julia_set(width, height, dark_mode):
             while abs(z) <= 2 and n < iterations:
                 z = z*z + C
                 n += 1
-            color = (0, 0, 0) if dark_mode else (255, 255, 255)
             if n < iterations:
-                color = (n % 8 * 32, n % 16 * 16, n % 32 * 8)
+                color = palette[n % len(palette)]
+            else:
+                color = (0, 0, 0) if dark_mode else (255, 255, 255)
             pixels[i, j] = color
-
 
     out_path = Path(f"/tmp/julia_set_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.png")
     img.save(out_path)
     return out_path
 
+def generate_mandelbrot(width, height, max_iter=1000, zoom=0.5, center_x=-0.75, center_y=0.0, dark_mode=False):
+    x = np.linspace(center_x - zoom, center_x + zoom, width)
+    y = np.linspace(center_y - zoom, center_y + zoom, height)
+    X, Y = np.meshgrid(x, y)
+    C = X + 1j * Y
+    Z = np.zeros_like(C)
+    div_time = np.zeros(C.shape, dtype=int)
+    mask = np.ones(C.shape, dtype=bool)
+    palette = random_palette()
 
-def generate_mandelbrot(width, height, max_iter=100):
+    for i in range(max_iter):
+        Z[mask] = Z[mask] ** 2 + C[mask]
+        mask, old_mask = np.abs(Z) < 2, mask
+        div_time[mask ^ old_mask] = i
+
     img = Image.new("RGB", (width, height))
     pixels = img.load()
-
-    # Coordinate space
-    # Zoomed-out (default view)
-    xmin, xmax = -2.0, 1.0
-    ymin, ymax = -1.5, 1.5
-
-    # Zoomed-in (smaller range, centered at -0.75, 0)
-    zoom = 0.5  # smaller = more zoomed in
-    center_x, center_y = -0.75, 0.0
-    xmin, xmax = center_x - zoom, center_x + zoom
-    ymin, ymax = center_y - zoom, center_y + zoom
-
-    for x in range(width):
-        for y in range(height):
-            zx = xmin + (xmax - xmin) * x / width
-            zy = ymin + (ymax - ymin) * y / height
-            z = complex(zx, zy)
-            c = z
-            n = 0
-            while abs(z) <= 2 and n < max_iter:
-                z = z * z + c
-                n += 1
-            color = 255 - int(n * 255 / max_iter)
-            pixels[x, y] = (123, color, color)
+    for i in range(width):
+        for j in range(height):
+            n = div_time[j, i]
+            if n < max_iter - 1:
+                color = palette[n % len(palette)]
+            else:
+                color = (0, 0, 0) if dark_mode else (255, 255, 255)
+            pixels[i, j] = color
 
     out_path = Path(f"/tmp/mandelbrot_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.png")
     img.save(out_path)
